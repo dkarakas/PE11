@@ -61,15 +61,29 @@ int Is_BMP_Header_Valid(BMP_Header* header, FILE *fptr) {
   // fill in extra to check for file size, image size
   // based on bits, width, and height
 
+  //set at the beggining
+  fseek(fptr,0,SEEK_END);
+  unsigned long int sizeFile = ftell(fptr);
 
+  if(sizeFile != header->size){
+    return NULL;
+  }
+  if((sizeFile-54) != header->imagesize){
+    return NULL;
+  }
+  
 
+  //find need padding
+  int bytePerPixel = header->bits/8;
+  int padNeed = (header->width*bytePerPixel)%4;
+  
+  if(padNeed != 0){
+    padNeed = 4 - padNeed;
+  }
 
-
-
-
-
-
-
+  if(header->imagesize != ((header->width*bytePerPixel)+padNeed)){
+    return NULL;
+  }
 
   return TRUE;
 }

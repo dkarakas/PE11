@@ -66,9 +66,11 @@ int Is_BMP_Header_Valid(BMP_Header* header, FILE *fptr) {
   unsigned long int sizeFile = ftell(fptr);
 
   if(sizeFile != header->size){
+    fprintf(stderr,"Not good header size\n");
     return FALSE;
   }
   if((sizeFile-54) != header->imagesize){
+    fprintf(stderr,"Not good header image size\n");
     return FALSE;
   }
   
@@ -77,11 +79,13 @@ int Is_BMP_Header_Valid(BMP_Header* header, FILE *fptr) {
   int bytePerPixel = header->bits/8;
   int padNeed = (header->width*bytePerPixel)%4;
   
+ // fprintf(stderr,"padNEED %d imagesize %d calc imagesize %d\n",padNeed,header->imagesize,((header->width*bytePerPixel)+padNeed)*header->height);
   if(padNeed != 0){
     padNeed = 4 - padNeed;
   }
 
-  if(header->imagesize != ((header->width*bytePerPixel)+padNeed)){
+  if(header->imagesize != (header->height*((header->width*bytePerPixel)+padNeed))){
+    fprintf(stderr,"Not good header image size//\n");
     return FALSE;
   }
 
@@ -104,30 +108,38 @@ BMP_Image *Read_BMP_Image(FILE* fptr) {
   BMP_Image *bmp_image = NULL;
 
   //Allocate memory for BMP_Image*;
-  bmp_image = (bmp_image *)malloc(sizeof(BMP_Image));
+  bmp_image = (BMP_Image*)malloc(sizeof(BMP_Image));
+  bmp_image->data = NULL;
+  if(bmp_image==NULL){
+    fprintf(stderr,"error malloc");
+    return NULL;
+  }
 
   //Read the first 54 bytes of the source into the header
-  int read = fread(&(bmp_image->header),sizeof(BMP_Header),1,fptr);
+  int read = fread((&(bmp_image->header)),sizeof(BMP_Header),1,fptr);
   // if read successful, check validity of header
   if(read == 1){
-    if(!Is_BMP_Header_Valid(bmp_image->header,fptr)){
-      fptr(stderr,"Can't read the image from file\n");
-      free(bmp_image);
+    if(!Is_BMP_Header_Valid(&bmp_image->header,fptr)){
+      fprintf(stderr,"Can't read the image from file1\n");
+      Free_BMP_Image(bmp_image);
       return NULL;
     }
   }else{
     return NULL;
   }
   // Allocate memory for image data
-  bmp_image->data = (char *)malloc(bmp_image->header.imagesize);
+  bmp_image->data = (unsigned char *)malloc(bmp_image->header.imagesize);
+  if(bmp_image->data==NULL){
+    fprintf(stderr,"error malloc bmp_image->data");
+    return NULL;
+  }
+
   // read in the image data
   fseek(fptr,sizeof(BMP_Header),SEEK_SET);
-  read = fread(&(bmp_image->data),bmp_image->header.imagesize,1,fptr);
+  read = fread(bmp_image->data,bmp_image->header.imagesize,1,fptr);
   if(read != 1){
-     fptr(stderr,"Can't read the image from file\n");
-     free(bmp_image->header);
-     free(bmp_image->data);
-     free(bmp_image);
+     fprintf(stderr,"Can't read the image from file2\n");
+     Free_BMP_Image(bmp_image);
      return NULL;
   }
   return bmp_image;
@@ -154,10 +166,9 @@ int Write_BMP_Image(FILE* fptr, BMP_Image* image)
  * the BMP_Image.
  */
 void Free_BMP_Image(BMP_Image* image) {
-  if(image->header!=NULL)
-    free(image->header);
-  if(image->data!=NULL)
-    free(image->data);
+  if(image!=NULL)
+    if(image->data!=NULL)
+      free(image->data);
   if(image!=NULL)
     free(image);
   return;

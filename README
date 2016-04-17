@@ -200,8 +200,8 @@ reading the file, the function should return NULL.
 !!deemed non-functional.
 
 (2 points)
-// Write BMP_Image to a given file
-//
+ Write BMP_Image to a given file
+
 int Write_BMP_Image(FILE *fptr, BMP_Image *image);
 
 Given a output file pointer, and an image file, write to the output file

@@ -186,18 +186,18 @@ Do not close the file pointer.  If there are issues allocating memory or
 reading the file, the function should return NULL.
 
 (2 points)
-// Check the validity of the header with the file from which the header is read
-//
-int Is_BMP_Header_Valid(BMP_Header *bmp_hdr, FILE *fptr);
+!!// Check the validity of the header with the file from which the header is read
+!!//
+!!int Is_BMP_Header_Valid(BMP_Header *bmp_hdr, FILE *fptr);
 
-Check whether the bmp_hdr is valid.  The code is partially written.
-You only have to fill in the part to check the fields "size", "imagesize"
-and see whether they match up with the given "bits", "width", and "height" 
-fields (see the description in the Overview).  Return TRUE is the header 
-is valid; FALSE otherwise.  This function will be called in the 
-Read_BMP_Image function.  It will be tested together with the Read_BMP_Image
-function.  If that function does not work properly, this function would be 
-deemed non-functional.
+!!Check whether the bmp_hdr is valid.  The code is partially written.
+!!You only have to fill in the part to check the fields "size", "imagesize"
+!!and see whether they match up with the given "bits", "width", and "height" 
+!!fields (see the description in the Overview).  Return TRUE is the header 
+!!is valid; FALSE otherwise.  This function will be called in the 
+!!Read_BMP_Image function.  It will be tested together with the Read_BMP_Image
+!!function.  If that function does not work properly, this function would be 
+!!deemed non-functional.
 
 (2 points)
 // Write BMP_Image to a given file
@@ -217,10 +217,10 @@ Return TRUE if write is successful; FALSE otherwise.
 (0 points)
 // Free memory in a given image
 //
-void Free_BMP_Image(BMP_Image *image);
+//void Free_BMP_Image(BMP_Image *image);
 
-This free the memory used by image.  No points will be given, but you would
-lose points (50% penalty) if this function does not work properly.
+//This free the memory used by image.  No points will be given, but you would
+//lose points (50% penalty) if this function does not work properly.
 
 (4 points)
 // Given a BMP_Image, create a new image that is a reflection

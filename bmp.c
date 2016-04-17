@@ -66,10 +66,10 @@ int Is_BMP_Header_Valid(BMP_Header* header, FILE *fptr) {
   unsigned long int sizeFile = ftell(fptr);
 
   if(sizeFile != header->size){
-    return NULL;
+    return FALSE;
   }
   if((sizeFile-54) != header->imagesize){
-    return NULL;
+    return FALSE;
   }
   
 
@@ -82,7 +82,7 @@ int Is_BMP_Header_Valid(BMP_Header* header, FILE *fptr) {
   }
 
   if(header->imagesize != ((header->width*bytePerPixel)+padNeed)){
-    return NULL;
+    return FALSE;
   }
 
   return TRUE;
@@ -99,34 +99,37 @@ int Is_BMP_Header_Valid(BMP_Header* header, FILE *fptr) {
 BMP_Image *Read_BMP_Image(FILE* fptr) {
 
   // go to the beginning of the file
+  fseek(fptr,0,SEEK_SET);
 
-   BMP_Image *bmp_image = NULL;
+  BMP_Image *bmp_image = NULL;
 
   //Allocate memory for BMP_Image*;
-
-
-
+  bmp_image = (bmp_image *)malloc(sizeof(BMP_Image));
 
   //Read the first 54 bytes of the source into the header
-
-
-
-
-
+  int read = fread(&(bmp_image->header),sizeof(BMP_Header),1,fptr);
   // if read successful, check validity of header
-
-
-
-
-
+  if(read == 1){
+    if(!Is_BMP_Header_Valid(bmp_image->header,fptr)){
+      fptr(stderr,"Can't read the image from file\n");
+      free(bmp_image);
+      return NULL;
+    }
+  }else{
+    return NULL;
+  }
   // Allocate memory for image data
-
-
-
-
- 
+  bmp_image->data = (char *)malloc(bmp_image->header.imagesize);
   // read in the image data
-
+  fseek(fptr,sizeof(BMP_Header),SEEK_SET);
+  read = fread(&(bmp_image->data),bmp_image->header.imagesize,1,fptr);
+  if(read != 1){
+     fptr(stderr,"Can't read the image from file\n");
+     free(bmp_image->header);
+     free(bmp_image->data);
+     free(bmp_image);
+     return NULL;
+  }
   return bmp_image;
 }
 
@@ -151,10 +154,13 @@ int Write_BMP_Image(FILE* fptr, BMP_Image* image)
  * the BMP_Image.
  */
 void Free_BMP_Image(BMP_Image* image) {
-
-
-
-
+  if(image->header!=NULL)
+    free(image->header);
+  if(image->data!=NULL)
+    free(image->data);
+  if(image!=NULL)
+    free(image);
+  return;
 }
 
 // Given a BMP_Image, create a new image that is a reflection 

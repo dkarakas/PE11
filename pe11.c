@@ -7,6 +7,7 @@
 int main(int argc,char **argv){
   //counter for number of operations;
   int counter = 0;
+  int write = 0;//used to assure successful writing
   FILE* fptr_in = NULL;
   FILE* fptr_out = NULL;
   BMP_Image *image = NULL;
@@ -38,6 +39,9 @@ int main(int argc,char **argv){
     return EXIT_FAILURE;
   }
   image = Read_BMP_Image(fptr_in);
+  write = Write_BMP_Image(fptr_out,image);
+  if(write)
+    fprintf(stderr,"successful print");
   Free_BMP_Image(image);
 
   fclose(fptr_in);

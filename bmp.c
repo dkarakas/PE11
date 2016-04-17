@@ -153,11 +153,22 @@ BMP_Image *Read_BMP_Image(FILE* fptr) {
 int Write_BMP_Image(FILE* fptr, BMP_Image* image) 
 {
    // go to the beginning of the file
+   fseek(fptr,0,SEEK_SET);
 
    // write header
+   int write = fwrite(&(image->header),sizeof(BMP_Header),1,fptr);
+   if(write != 1){
+     fprintf(stderr,"error printing file"); 
+     return FALSE;
+   }
 
 
    // write image data
+   write = fwrite(image->data,image->header.imagesize,1,fptr);
+   if(write != 1){
+     fprintf(stderr,"error printing file"); 
+     return FALSE;
+   }
 
    return TRUE;
 }

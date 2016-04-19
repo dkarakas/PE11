@@ -83,6 +83,7 @@ int Is_BMP_Header_Valid(BMP_Header* header, FILE *fptr) {
   if(padNeed != 0){
     padNeed = 4 - padNeed;
   }
+fprintf(stderr,"padNeed = %d bytePerPixel %d padNeed %d header->width %d imagesize %d\n",padNeed, bytePerPixel, (header->width*bytePerPixel),header->width,header->imagesize);
 
   if(header->imagesize != (header->height*((header->width*bytePerPixel)+padNeed))){
     fprintf(stderr,"Not good header image size//\n");
@@ -142,6 +143,29 @@ BMP_Image *Read_BMP_Image(FILE* fptr) {
      Free_BMP_Image(bmp_image);
      return NULL;
   }
+
+   //find need padding
+   int bytePerPixel = bmp_image->header.bits/8;
+   int padNeed = (bmp_image->header.width*bytePerPixel)%4;
+   if(padNeed != 0){
+      padNeed = 4 - padNeed;
+   } 
+
+  //char (*arrayOriginalPicture)[bmp_image->header.width+1][bytePerPixel] = (char (*)[bmp_image->header.width+1][bytePerPixel])(bmp_image->data); 
+  char (*arrayOriginalPicture)[bmp_image->header.width*bytePerPixel+padNeed]= (char (*)[bmp_image->header.width*bytePerPixel+padNeed])(bmp_image->data); 
+  int i,j;
+  //for(i=0; i<bmp_image->header.height;i++)
+  //  for(j=0; j<bmp_image->header.width;j++)
+         
+  //     }
+fprintf(stderr,"bmp_image->header.height %d header->width %d pad %d \n", bmp_image->header.height,bmp_image->header.width+1,bytePerPixel);
+//(header->height*((header->width*bytePerPixel)+padNeed)
+
+  for(i=0; i<bmp_image->header.height;i++)
+    for(j=0; j<(bmp_image->header.width*bytePerPixel+padNeed);j++)
+        if(   bmp_image->header.width*bytePerPixel <= j  ){
+          arrayOriginalPicture[i][j] = 0;
+        }
   return bmp_image;
 }
 
@@ -201,9 +225,89 @@ void Free_BMP_Image(BMP_Image* image) {
 
 BMP_Image *Reflect_BMP_Image(BMP_Image *image, int hrefl, int vrefl)
 {
-   // create a new image reflected from the given image
+   //CREATING A NEW STRUCTURE FOR THE IMAGE AND COPYING THE HEADER.
    BMP_Image *t_image = NULL;
+   if(image != NULL){
+     //ALLOC SPACE FOR THE NEW STRUCTURE
+     t_image = (BMP_Image *)malloc(sizeof(BMP_Image));
+     if(t_image == NULL){
+       return NULL;
+     }
+     t_image->data = NULL;
 
+     t_image->data = (unsigned char *)malloc(image->header.imagesize);
+     if(t_image->data==NULL){
+       free(t_image);
+       fprintf(stderr,"error malloc bmp_image->data");
+       return NULL;
+     }
+
+     //COPYING THE HEADER INTO THE NEW STRUCTURE
+     t_image->header = image->header;
+   } 
+
+   //find need padding
+   int bytePerPixel = image->header.bits/8;
+   int padNeed = (image->header.width*bytePerPixel)%4;
+   if(padNeed != 0){
+      padNeed = 4 - padNeed;
+   } 
+
+   //
+   char (*arrayPic)[image->header.width*bytePerPixel+padNeed] = (char (*)[image->header.width*bytePerPixel+padNeed])(t_image->data);
+   char (*arrayOriginalPicture)[image->header.width*bytePerPixel+padNeed] = (char (*)[image->header.width*bytePerPixel+padNeed])(image->data); 
+
+
+  int i,j;
+  int count =1;
+  int move = 0;
+   if(hrefl == 1){
+     for(i=0; i<image->header.height;i++){
+       for(j=0; j < (image->header.width*bytePerPixel+padNeed);j++)
+           if(   image->header.width*bytePerPixel > j  ){
+                arrayPic[i][(bytePerPixel*count)-move] =  arrayOriginalPicture[i][image->header.width*bytePerPixel-j];
+                move++;
+                if((j%bytePerPixel)==0 && j!=0){
+                  count++;
+                  move = 0;
+                }
+           }else{break;}
+      count = 1;
+      move = 0;
+     }
+     Free_BMP_Image(image);
+     return t_image;
+   }
+
+
+/*  
+   //ARRAY VARIABLES
+   int i,j,k;
+   if(hrefl == 1){
+     for(i=0; i<image->header.height;i++)
+        for(j=0; j<image->header.width;j++)
+           for(k=0; k<bytePerPixel; k++){
+              if((j != (image->header.width-1)) || ((bytePerPixel-k)>padNeed)){
+                arrayPic[i][j][k] = arrayOriginalPicture[i][image->header.width-1-j][k];
+              }
+           }
+     Free_BMP_Image(image);
+     return t_image;
+   }
+*/
+  for(i=0; i<image->header.height;i++)
+    for(j=0; j<(image->header.width*bytePerPixel+padNeed);j++)
+        if(   image->header.width*bytePerPixel <= j  ){
+          arrayPic[i][j] = 0;
+        }
+   if(vrefl == 1){
+     for(i=0; i<image->header.height;i++)
+       for(j=0; j < image->header.width*bytePerPixel;j++)
+                arrayPic[i][j] =  arrayOriginalPicture[image->header.height-i-1][j];
+   Free_BMP_Image(image);
    return t_image;
+
+   }
+   return image;
 }
 

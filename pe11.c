@@ -39,9 +39,8 @@ int main(int argc,char **argv){
     return EXIT_FAILURE;
   }
   image = Read_BMP_Image(fptr_in);
+  image = Reflect_BMP_Image(image, 0 , 1);
   write = Write_BMP_Image(fptr_out,image);
-  if(write)
-    fprintf(stderr,"successful print");
   Free_BMP_Image(image);
 
   fclose(fptr_in);

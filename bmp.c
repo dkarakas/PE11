@@ -257,28 +257,33 @@ BMP_Image *Reflect_BMP_Image(BMP_Image *image, int hrefl, int vrefl)
    char (*arrayPic)[image->header.width*bytePerPixel+padNeed] = (char (*)[image->header.width*bytePerPixel+padNeed])(t_image->data);
    char (*arrayOriginalPicture)[image->header.width*bytePerPixel+padNeed] = (char (*)[image->header.width*bytePerPixel+padNeed])(image->data); 
 
-
   int i,j;
-  int count =1;
-  int move = 0;
+  for(i=0; i<t_image->header.height;i++)
+    for(j=0; j<(t_image->header.width*bytePerPixel+padNeed);j++)
+        if(   t_image->header.width*bytePerPixel <= j  ){
+          arrayPic[i][j] = 0;
+        }
+
+
+  int count;
+  int move;
    if(hrefl == 1){
      for(i=0; i<image->header.height;i++){
+      count = 1;
+      move = 1;
        for(j=0; j < (image->header.width*bytePerPixel+padNeed);j++)
            if(   image->header.width*bytePerPixel > j  ){
-                arrayPic[i][(bytePerPixel*count)-move] =  arrayOriginalPicture[i][image->header.width*bytePerPixel-j];
+                arrayPic[i][bytePerPixel*count-move] =  arrayOriginalPicture[i][image->header.width*bytePerPixel-1-j];
                 move++;
-                if((j%bytePerPixel)==0 && j!=0){
+                if(move == 4){
                   count++;
-                  move = 0;
+                  move = 1;
                 }
            }else{break;}
-      count = 1;
-      move = 0;
-     }
+      }
      Free_BMP_Image(image);
      return t_image;
    }
-
 
 /*  
    //ARRAY VARIABLES
@@ -295,11 +300,6 @@ BMP_Image *Reflect_BMP_Image(BMP_Image *image, int hrefl, int vrefl)
      return t_image;
    }
 */
-  for(i=0; i<image->header.height;i++)
-    for(j=0; j<(image->header.width*bytePerPixel+padNeed);j++)
-        if(   image->header.width*bytePerPixel <= j  ){
-          arrayPic[i][j] = 0;
-        }
    if(vrefl == 1){
      for(i=0; i<image->header.height;i++)
        for(j=0; j < image->header.width*bytePerPixel;j++)

@@ -39,7 +39,7 @@ int main(int argc,char **argv){
     return EXIT_FAILURE;
   }
   image = Read_BMP_Image(fptr_in);
-  image = Reflect_BMP_Image(image, 0 , 1);
+  image = Reflect_BMP_Image(image, 1 , 0);
   write = Write_BMP_Image(fptr_out,image);
   Free_BMP_Image(image);
 

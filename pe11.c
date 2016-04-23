@@ -11,16 +11,14 @@ int main(int argc,char **argv){
   FILE* fptr_in = NULL;
   FILE* fptr_out = NULL;
   BMP_Image *image = NULL;
-  if(argc < 4){
+  if(argc < 3){
     fprintf(stderr,"Not enough arguments\n");
     return EXIT_FAILURE;
   }
   while(counter < (argc-3)){
    if(!strcmp(argv[counter+1],"-v")){
-       fprintf(stderr,"push -v\n");
        counter++;
      }else if(!strcmp(argv[counter+1],"-h")){
-       fprintf(stderr,"push -h\n");
        counter++;
      }else{
        fprintf(stderr,"free unkown input\n");
@@ -38,8 +36,21 @@ int main(int argc,char **argv){
     fprintf(stderr,"can't open file. free linked list and input file.\n");
     return EXIT_FAILURE;
   }
+
+
   image = Read_BMP_Image(fptr_in);
-  image = Reflect_BMP_Image(image, 1 , 0);
+  counter = 0;
+
+  while(counter < (argc-3)){
+   if(!strcmp(argv[counter+1],"-v")){
+       image = Reflect_BMP_Image(image, 0 , 1);
+       counter++;
+     }else if(!strcmp(argv[counter+1],"-h")){
+       image = Reflect_BMP_Image(image, 1 , 0);
+       counter++;
+     }
+  }
+
   write = Write_BMP_Image(fptr_out,image);
   Free_BMP_Image(image);
 

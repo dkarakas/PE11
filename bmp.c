@@ -79,11 +79,9 @@ int Is_BMP_Header_Valid(BMP_Header* header, FILE *fptr) {
   int bytePerPixel = header->bits/8;
   int padNeed = (header->width*bytePerPixel)%4;
   
- // fprintf(stderr,"padNEED %d imagesize %d calc imagesize %d\n",padNeed,header->imagesize,((header->width*bytePerPixel)+padNeed)*header->height);
   if(padNeed != 0){
     padNeed = 4 - padNeed;
   }
-fprintf(stderr,"padNeed = %d bytePerPixel %d padNeed %d header->width %d imagesize %d\n",padNeed, bytePerPixel, (header->width*bytePerPixel),header->width,header->imagesize);
 
   if(header->imagesize != (header->height*((header->width*bytePerPixel)+padNeed))){
     fprintf(stderr,"Not good header image size//\n");
@@ -151,15 +149,8 @@ BMP_Image *Read_BMP_Image(FILE* fptr) {
       padNeed = 4 - padNeed;
    } 
 
-  //char (*arrayOriginalPicture)[bmp_image->header.width+1][bytePerPixel] = (char (*)[bmp_image->header.width+1][bytePerPixel])(bmp_image->data); 
   char (*arrayOriginalPicture)[bmp_image->header.width*bytePerPixel+padNeed]= (char (*)[bmp_image->header.width*bytePerPixel+padNeed])(bmp_image->data); 
   int i,j;
-  //for(i=0; i<bmp_image->header.height;i++)
-  //  for(j=0; j<bmp_image->header.width;j++)
-         
-  //     }
-fprintf(stderr,"bmp_image->header.height %d header->width %d pad %d \n", bmp_image->header.height,bmp_image->header.width+1,bytePerPixel);
-//(header->height*((header->width*bytePerPixel)+padNeed)
 
   for(i=0; i<bmp_image->header.height;i++)
     for(j=0; j<(bmp_image->header.width*bytePerPixel+padNeed);j++)
@@ -253,7 +244,6 @@ BMP_Image *Reflect_BMP_Image(BMP_Image *image, int hrefl, int vrefl)
       padNeed = 4 - padNeed;
    } 
 
-   //
    char (*arrayPic)[image->header.width*bytePerPixel+padNeed] = (char (*)[image->header.width*bytePerPixel+padNeed])(t_image->data);
    char (*arrayOriginalPicture)[image->header.width*bytePerPixel+padNeed] = (char (*)[image->header.width*bytePerPixel+padNeed])(image->data); 
 
@@ -275,7 +265,7 @@ BMP_Image *Reflect_BMP_Image(BMP_Image *image, int hrefl, int vrefl)
            if(   image->header.width*bytePerPixel > j  ){
                 arrayPic[i][bytePerPixel*count-move] =  arrayOriginalPicture[i][image->header.width*bytePerPixel-1-j];
                 move++;
-                if(move == 4){
+                if(move == (bytePerPixel+1)){
                   count++;
                   move = 1;
                 }
@@ -285,21 +275,6 @@ BMP_Image *Reflect_BMP_Image(BMP_Image *image, int hrefl, int vrefl)
      return t_image;
    }
 
-/*  
-   //ARRAY VARIABLES
-   int i,j,k;
-   if(hrefl == 1){
-     for(i=0; i<image->header.height;i++)
-        for(j=0; j<image->header.width;j++)
-           for(k=0; k<bytePerPixel; k++){
-              if((j != (image->header.width-1)) || ((bytePerPixel-k)>padNeed)){
-                arrayPic[i][j][k] = arrayOriginalPicture[i][image->header.width-1-j][k];
-              }
-           }
-     Free_BMP_Image(image);
-     return t_image;
-   }
-*/
    if(vrefl == 1){
      for(i=0; i<image->header.height;i++)
        for(j=0; j < image->header.width*bytePerPixel;j++)
